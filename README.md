@@ -51,7 +51,7 @@ python results.py --model-path [path]
 ### Datasets
 
 All datasets are located in AWS S3 at the URL: `s3://kin-del-2024/data`.
-You can preview the data using 42basepairs here: https://42basepairs.com/browse/s3/kin-del-2024
+You can preview the data using [42basepairs](https://42basepairs.com/) here: https://42basepairs.com/browse/s3/kin-del-2024
 
 The recommended **training dataset** is stored in the `{target}_1M.parquet`
 files, which contain top 1M molecules from the DEL screen that were used to
