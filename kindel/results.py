@@ -52,12 +52,16 @@ if __name__ == "__main__":
                     scores = [score**2 for score in results[test_set][metric]]
                     mu = np.mean(scores)
                     std = np.std(scores)
-                    latex.append(f"{mu:.3f} $\pm$ {std:.3f}")
+                    latex.append(
+                        f"\n---{target}:{split_type}:{metric} - {test_set}: mean: {mu:.3f} $\pm$ standard deviation: {std:.3f}"
+                    )
                 else:
                     for condition in ("on", "off"):
-                        metric = "rho"
-                        mu = -np.mean(results[test_set][condition][metric])
-                        std = np.std(results[test_set][condition][metric])
-                        latex.append(f"{mu:.3f} $\pm$ {std:.3f}")
+                        for metric in ("rho", "tau"):
+                            mu = -np.mean(results[test_set][condition][metric])
+                            std = np.std(results[test_set][condition][metric])
+                            latex.append(
+                                f"\n---{target}:{split_type}:{metric}:{condition} - {test_set}: mean: {mu:.3f} $\pm$ standard deviation: {std:.3f}"
+                            )
 
             print(" & ".join(latex))

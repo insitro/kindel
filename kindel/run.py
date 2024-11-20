@@ -1,14 +1,17 @@
 import os
 from typing import List, Optional
+import pickle
 
 import wandb
 import yaml
+import torch
 from pytorch_lightning.loggers import WandbLogger
 from redun import Dir, File, task
 
 from kindel.models.basic import RandomForest, KNeareastNeighbors, XGBoost
 from kindel.models.gnn import GraphIsomorphismNetwork
-from kindel.models.torch import DeepNeuralNetwork
+from kindel.models.torch import DeepNeuralNetwork, TransfNetwork
+from kindel.models.moe import MixtureOfExpertsWithKindel
 from kindel.utils.data import (
     get_training_data,
     get_testing_data,
@@ -45,6 +48,10 @@ def get_model(model_name: str, hyperparameters: dict, wandb_logger: WandbLogger)
         model = GraphIsomorphismNetwork(wandb_logger, **hyperparameters)
     elif model_name.lower().startswith("compose"):
         model = DELCompose(wandb_logger, **hyperparameters)
+    elif model_name.lower().startswith("transf"):
+        model = TransfNetwork(wandb_logger, **hyperparameters)
+    elif model_name.lower().startswith("moe"):
+        model = "moe"
     else:
         raise ValueError(f"Unknown model: {model_name}")
     return model
@@ -57,13 +64,15 @@ def training_subjob(
     split_index: int,
     split_type: str,
     target: str,
-    wandb_project: str | None = None,
+    wandb_project: Optional[str] = None,
     hyperparameters: dict | None = None,
 ) -> File:
     set_seed(123)
     df_train, df_valid, df_test = get_training_data(
         target, split_index=split_index, split_type=split_type
     )
+
+    model_saving_path = "kindel/trained_models"
 
     if hyperparameters is None:
         hyperparameters = {}
@@ -81,8 +90,27 @@ def training_subjob(
     else:
         wandb_logger = None
 
-    model = get_model(model_name, hyperparameters, wandb_logger)
-    data = model.prepare_dataset(df_train, df_valid, df_test)
+    if model_name.lower().startswith("moe"):
+
+        expert_1 = TransfNetwork()
+        expert_2 = XGBoost()
+        data = expert_1.prepare_dataset(df_train, df_valid, df_test)
+        expert_2.data = data
+
+        expert_1.train()
+        expert_2.train()
+
+        model = MixtureOfExpertsWithKindel(
+            wandb_logger,
+            expert_1=expert_1,
+            expert_2=expert_2,
+        )
+        data = model.prepare_dataset(df_train, df_valid, df_test)
+
+    else:
+        model = get_model(model_name, hyperparameters, wandb_logger)
+        data = model.prepare_dataset(df_train, df_valid, df_test)
+
     model.train()
 
     results = {}
@@ -119,6 +147,20 @@ def training_subjob(
             f"results_metrics_s{split_index}_{target}.yml",
         )
     )
+
+    # try:
+    #     torch.save(model.state_dict(), model_dir)
+
+    # except AttributeError:
+    #     # print(
+    #     #     f"The model {expert_2} has no attribute 'state_dict; the model may not be trained. Trying pickle"
+    #     # )
+    #     # save
+    #     with open(
+    #         f"{model_saving_path}/model_{split_type}_{split_index}.pkl", "wb"
+    #     ) as f:
+    #         pickle.dump(expert_2, f)
+
     with results_file.open("w") as fp:
         yaml.dump(results, fp)
 
@@ -130,7 +172,7 @@ def training_subjob(
 def train(
     model: str,
     output_dir: Dir,
-    wandb_project: str | None = None,
+    wandb_project: Optional[str] = None,
     targets: List[str] = ["ddr1", "mapk14"],
     splits: List[str] = ["random", "disynthon"],
     split_indexes: List[int] = [1, 2, 3, 4, 5],

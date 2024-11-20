@@ -1,0 +1,64 @@
+all:
+  'off':
+    rho: !!python/object/apply:numpy.core.multiarray.scalar
+    - &id001 !!python/object/apply:numpy.dtype
+      args:
+      - f8
+      - false
+      - true
+      state: !!python/tuple
+      - 3
+      - <
+      - null
+      - null
+      - null
+      - -1
+      - -1
+      - 0
+    - !!binary |
+      s3pPEO8g1j8=
+    tau: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      ddFFF1100T8=
+  'on':
+    rho: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      pGis5cUUt78=
+    tau: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      k0oxqwPdr78=
+lib:
+  'off':
+    rho: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      B8GpTNgG2T8=
+    tau: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      o4suuuii0z8=
+  'on':
+    rho: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      pFr/QJLln78=
+    tau: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      YDXzluJHnL8=
+test:
+  rho: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    acL3N0C53r8=
+  rmse: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    /mpGmVu53z8=
+  tau: !!python/object/apply:numpy.core.multiarray.scalar
+  - *id001
+  - !!binary |
+    I9/WwWlU2b8=

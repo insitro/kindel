@@ -10,10 +10,12 @@ from kindel.models.basic import Dataset, Example
 from kindel.models.torch import TorchModel
 from kindel.utils.graph_feat import featurize_graph
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 class GraphIsomorphismNetwork(TorchModel):
     def _create_model(self, **hyperparameters):
-        return GraphIsomorphismNetworkModule(**hyperparameters)
+        return GraphIsomorphismNetworkModule(**hyperparameters).to(device)
 
     def prepare_dataset(self, df_train, df_valid, df_test):
         self.data_module = GraphDataModule(df_train, df_valid, df_test)

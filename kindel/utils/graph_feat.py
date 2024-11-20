@@ -1,3 +1,5 @@
+"""Graph featurization module"""
+
 from typing import Any
 
 import numpy as np
@@ -183,6 +185,7 @@ def get_one_hot_atom_features(
 
 
 def featurize_graph(df, smiles_col="smiles", label_col="y"):
+    """Featurises data from SMILES representation to graph data"""
     graphs = []
     for smiles, y in zip(df[smiles_col], df[label_col]):
         mol = Chem.MolFromSmiles(smiles)

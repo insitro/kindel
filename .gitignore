@@ -6,3 +6,7 @@ __pycache__
 kindel/.redun/redun.db
 .idea
 .DS_Store
+
+# .env files
+.env
+*.env

@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "C:/Users/AFilipeNeto/Documents/candidaturas/interviews/loka_test/kindel/.venv/Scripts/redun",
+            "console": "integratedTerminal",
+            "args": [
+                "-c",
+                "kindel/.redun",
+                "run",
+                "kindel/run.py",
+                "train",
+                "--model",
+                "moe_local",
+                "--output-dir",
+                "out",
+                "--targets",
+                "ddr1",
+                "--splits",
+                "random",
+                "--split-indexes",
+                "1",
+            ]
+        }
+    ]
+}

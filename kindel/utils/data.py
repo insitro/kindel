@@ -5,9 +5,11 @@ import pandas as pd
 from rdkit import Chem
 from scipy.stats import kendalltau, spearmanr
 from tqdm import tqdm
+from dotenv import load_dotenv
 
 from kindel.utils.fingerprint_feat import CircularFingerprint
 
+load_dotenv(".env")
 DATA_ROOT = "s3://kin-del-2024/data"
 
 
@@ -30,26 +32,32 @@ def featurize(df, smiles_col, label_col=None):
 
 
 def get_training_data(target, split_index, split_type):
-    df = pd.read_parquet(os.path.join(DATA_ROOT, f"{target}_1M.parquet")).rename(
-        {"target_enrichment": "y"}, axis="columns"
-    )
+    df = pd.read_parquet(
+        f"{DATA_ROOT}/{target}_1M.parquet", storage_options={"anon": False}
+    ).rename({"target_enrichment": "y"}, axis="columns")
     df_split = pd.read_parquet(
-        os.path.join(DATA_ROOT, "splits", f"{target}_{split_type}.parquet")
+        f"{DATA_ROOT}/splits/{target}_{split_type}.parquet",
+        storage_options={"anon": False},
     )
+
     return (
-        df[df_split[f"split{split_index}"] == "train"],
-        df[df_split[f"split{split_index}"] == "valid"],
-        df[df_split[f"split{split_index}"] == "test"],
+        df[df_split[f"split{split_index}"] == "train"].sample(
+            frac=0.01, random_state=1
+        ),
+        df[df_split[f"split{split_index}"] == "valid"].sample(
+            frac=0.01, random_state=1
+        ),
+        df[df_split[f"split{split_index}"] == "test"].sample(frac=0.01, random_state=1),
     )
 
 
 def get_testing_data(target, in_library=False):
     data = {
         "on": pd.read_csv(
-            os.path.join(DATA_ROOT, "heldout", f"{target}_ondna.csv"), index_col=0
+            f"{DATA_ROOT}/heldout/{target}_ondna.csv", index_col=0
         ).rename({"kd": "y"}, axis="columns"),
         "off": pd.read_csv(
-            os.path.join(DATA_ROOT, "heldout", f"{target}_offdna.csv"), index_col=0
+            f"{DATA_ROOT}/heldout/{target}_offdna.csv", index_col=0
         ).rename({"kd": "y"}, axis="columns"),
     }
     if in_library:
@@ -59,9 +67,7 @@ def get_testing_data(target, in_library=False):
 
 
 def evaluate(preds, target, condition):
-    df = pd.read_csv(
-        os.path.join(DATA_ROOT, "heldout", f"{target}_{condition}dna.csv"), index_col=0
-    )
+    df = pd.read_csv(f"{DATA_ROOT}/heldout/{target}_{condition}dna.csv", index_col=0)
     return spearmanr(preds, df.kd)[0], kendalltau(preds, df.kd)[0]
 
 
