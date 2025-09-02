@@ -5,6 +5,9 @@
 KinDEL is a large DNA-encoded library dataset containing two kinase
 targets (DDR1 and MAPK14) for benchmarking machine learning models.
 
+ICML poster/paper: https://icml.cc/virtual/2025/poster/45034
+Preprint: https://arxiv.org/abs/2410.08938
+
 ## Usage
 
 ### Installation
